@@ -2,12 +2,6 @@
 import os
 
 def testconfigure():
-    """
-    Custom function for configuring the current working directory of the program during runtime to
-    "C:\\Users\\USER\\Documents\\My Homepage files\\Web Projects 2\\Project-2-Image-Scanning-Backend".
-    It's a custom function that I implemented that helps me to open files without worrying much about the path I'm
-    in as long as I am in the directory above or in a parent path relative to it.
-    """
     location = os.getcwd()
     if not "Web Projects 2\Project-2-Image-Scanning-Backend" in location:
         try:
@@ -35,6 +29,11 @@ def testconfigure():
 
 if __name__ != "__main__":
     def configure():
+        r"""Custom module for configuring the current working directory of the program during runtime to
+            "C:\\Users\\USER\\Documents\\My Homepage files\\Web Projects 2\\Project-2-Image-Scanning-Backend".
+            It's a custom function that I implemented that helps me to open files without worrying much about the path I'm
+            in as long as I am in the directory above or in a parent path relative to it.
+        """
         testconfigure()
 else:
     testconfigure()

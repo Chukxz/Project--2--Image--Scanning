@@ -18,8 +18,8 @@
 # print("final",res2,type(res2))
 
 
-#Use gaussian blur
 #Convert to greyscale 
+#Use gaussian blur
 #Use Sobel edge detector in x and y direction
 #Also get gradient and orientation
 #Use canny edge
@@ -86,17 +86,60 @@
 #     for row in rows:
 #         print(row[1],row[2],row[3])
 
-import re
-test = '-gg'
+# import re
+# gray_scale_files = str(input("Input list of extensions for output files (eg. for jpg and png input 'jpg & png', do not repeat extensions!): "))
 
-resfindall = re.findall(r"-",test)
-resmatch = re.match(r'-',test)
+# supported_image_formats = ['jpg','webp','png']
+# verify_list = re.split(r'[\s][\&][\s)]',gray_scale_files)
 
-if not resmatch == None:
-    if resfindall.count("-") == 1:
-        res = re.sub("-","",test)
-        print(res)
-    else: raise TypeError
-else:
-    raise TypeError
+# print(verify_list)
 
+import os,sqlite3,re
+parentdir = os.getcwd()
+
+def createSpImgExtFile():
+    #Image extensions path
+    sp_img_ext_name = 'Supported Image Extensions'
+    sp_img_ext_loc = os.path.join(parentdir,sp_img_ext_name+'.db')
+    default = ['jpg','png','webp']
+    column_name = 'Extension List'
+    if not os.path.exists(sp_img_ext_loc):
+        # Connect to a database and create a connection object
+        conn = sqlite3.connect(sp_img_ext_loc)
+        # Create a cursor object
+        cursor = conn.cursor()
+        print("Generating database with default values")         
+        create_table = f"CREATE TABLE {sp_img_ext_name}({column_name} TEXT)"
+        cursor.execute(create_table)
+
+        for i in default:
+            queryI = f'INSERT  INTO {sp_img_ext_name} ({column_name})) VALUES ({i})'
+
+        #Commit the changes to the database
+        conn.commit()
+        #Close the cursor and connection objects
+        cursor.close()
+        conn.close()
+
+createSpImgExtFile()
+
+def editSpImgExtFile(input_command):
+    # createSpImgExtFile()
+    sp_img_ext_name = 'Supported Image Extensions'
+    sp_img_ext_loc = os.path.join(parentdir,sp_img_ext_name+'.db')
+    generated_commands =  re.split(' ',input_command)
+
+    print(generated_commands)
+
+
+    if generated_commands[0] == 'remove' or generated_commands[0] == 'add': ...
+    #         command = generated_commands[0]
+    #         value = generated_commands[]
+    #         # Connect to a database and create a connection object
+    #         conn = sqlite3.connect(sp_img_ext_loc)
+    #         # Create a cursor object
+            
+    #         cursor = conn.cursor()
+    #         query = f'DELETE '
+
+# editSpImgExtFile(str(input('Input Command : ')))

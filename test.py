@@ -1,26 +1,26 @@
-import perbackendconfig,re
-from PIL import Image
+# import perbackendconfig,re
+# from PIL import Image
 
-perbackendconfig.configure()
-
-
-# #Define the pizel data
-pixel_data1 = [(255,0,0),(0,255,0),(0,0,255)]
-pixel_data2 = [(255,240,142),(89,255,90),(149,212,255)]
+# perbackendconfig.configure()
 
 
+# # #Define the pizel data
+# pixel_data1 = [(255,0,0),(0,255,0),(0,0,255)]
+# pixel_data2 = [(255,240,142),(89,255,90),(149,212,255)]
 
-#Create an new image with the desired dimensions
-image = Image.new('RGB',(3,2))
 
 
-#Set the pixel values for the image
-image.putdata(pixel_data1)
+# #Create an new image with the desired dimensions
+# image = Image.new('RGB',(3,2))
 
-image.putdata(pixel_data2)
 
-#Save the image file
-image.save('test3.png')
+# #Set the pixel values for the image
+# image.putdata(pixel_data1)
+
+# image.putdata(pixel_data2)
+
+# #Save the image file
+# image.save('test3.png')
 
 # o = Image.open('test2.png')
 # p = o.load()
@@ -43,6 +43,3 @@ image.save('test3.png')
 
 # #Save the image file
 # image.save('Pipe Puzzle GrayScale.png')
-
-
-
