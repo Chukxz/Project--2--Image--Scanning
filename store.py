@@ -94,52 +94,103 @@
 
 # print(verify_list)
 
-import os,sqlite3,re
-parentdir = os.getcwd()
+# import os,sqlite3,re, perbackendconfig
 
-def createSpImgExtFile():
-    #Image extensions path
-    sp_img_ext_name = 'Supported Image Extensions'
-    sp_img_ext_loc = os.path.join(parentdir,sp_img_ext_name+'.db')
-    default = ['jpg','png','webp']
-    column_name = 'Extension List'
-    if not os.path.exists(sp_img_ext_loc):
-        # Connect to a database and create a connection object
-        conn = sqlite3.connect(sp_img_ext_loc)
-        # Create a cursor object
-        cursor = conn.cursor()
-        print("Generating database with default values")         
-        create_table = f"CREATE TABLE {sp_img_ext_name}({column_name} TEXT)"
-        cursor.execute(create_table)
+# perbackendconfig.configure()
 
-        for i in default:
-            queryI = f'INSERT  INTO {sp_img_ext_name} ({column_name})) VALUES ({i})'
+# parentdir = os.getcwd()
 
-        #Commit the changes to the database
-        conn.commit()
-        #Close the cursor and connection objects
-        cursor.close()
-        conn.close()
+# def createSpImgExtFile():
+#     #Image extensions path
+#     sp_img_ext_name = "Supported Image Extensions"
+#     sp_img_ext_loc = os.path.join(parentdir, f'{sp_img_ext_name}.txt')
+#     default = ['jpg','png','webp']
 
-createSpImgExtFile()
+#     if not os.path.exists(sp_img_ext_loc):
+#         try:
+#             with open(sp_img_ext_loc,'w') as extF:
+#                 for i in default:
+#                     extF.write(f'{i}\n')
+#         except BaseException as err:
+#             print(err)
 
-def editSpImgExtFile(input_command):
-    # createSpImgExtFile()
-    sp_img_ext_name = 'Supported Image Extensions'
-    sp_img_ext_loc = os.path.join(parentdir,sp_img_ext_name+'.db')
-    generated_commands =  re.split(' ',input_command)
+  
+# def editSpImgExtFile(input_command):
+#     createSpImgExtFile()
+#     default = ['jpg','png','webp']
+#     sp_img_ext_name = 'Supported Image Extensions.txt'
+#     sp_img_ext_loc = os.path.join(parentdir,sp_img_ext_name)
+#     generated_commands =  re.split(' ',input_command)
 
-    print(generated_commands)
+#     store = []
+#     deletes = []
 
+#     if generated_commands[0] == 'delete' or generated_commands[0] == 'add':
+#         try:
+#             with open(sp_img_ext_loc,'r') as extF:
+#                 num = extF.readlines()
+#                 for i in num:
+#                     val = re.sub('\n','',i)
+#                     store.append(val)
 
-    if generated_commands[0] == 'remove' or generated_commands[0] == 'add': ...
-    #         command = generated_commands[0]
-    #         value = generated_commands[]
-    #         # Connect to a database and create a connection object
-    #         conn = sqlite3.connect(sp_img_ext_loc)
-    #         # Create a cursor object
-            
-    #         cursor = conn.cursor()
-    #         query = f'DELETE '
+#             if generated_commands[0] == 'add':
+#                 pre_store_set = set(store)
+#                 for i in range(len(generated_commands)-1):
+#                     store.append(generated_commands[i+1])
+#                 store_set = set(store)
+#                 store_list = list(pre_store_set)
+#                 val = list(store_set.difference(pre_store_set))
+
+#                 for h in range(len(store_list)):
+#                     if store_list[h] in default:
+#                         print(f'Not able to add {store_list[h]} as it is a default value')
+#                     elif store_list[h] not in default:
+#                         print(f'{store_list[h]} already exists in {sp_img_ext_loc}')
+
+#                 if val:
+#                     with open(sp_img_ext_loc,'a') as extF:
+#                         for k in range(len(val)):
+#                                 extF.write(f'{val[k]}\n')
+#                                 print(f'Added {val[k]} to {sp_img_ext_loc}')
+
+#             if generated_commands[0] == 'delete':
+#                 for i in range(len(generated_commands)-1):
+#                     if generated_commands[i+1] in store:
+#                         if not generated_commands[i+1] in default:
+#                             indexVal = store.index(generated_commands[i+1])
+#                             deletes.append(store.pop(indexVal))
+#                 with open(sp_img_ext_loc,'w') as extF:
+#                     for j in store:
+#                         if j != len(store)-1:
+#                             extF.write(f'{j}\n')
+#                         else:
+#                             extF.write(j)
+#                 for i in deletes:
+#                     print(f'Deleted {i} in {sp_img_ext_loc}')
+#                 for j in store:
+#                     if j in generated_commands and j in default:
+#                         print(f'Not able to delete {j} as it is a default value')
+#                 for k in generated_commands:
+#                     if k not in deletes:
+#                         if k in generated_commands and not k in default and k != 'delete':
+#                             print(f'{k} not found in {sp_img_ext_loc}')                    
+
+#         except BaseException as err:
+#             print(err)
 
 # editSpImgExtFile(str(input('Input Command : ')))
+
+# def getSpImgExt():
+#     sp_img_ext_name = 'Supported Image Extensions.txt'
+#     sp_img_ext_loc = os.path.join(parentdir,sp_img_ext_name)
+#     store = []
+#     try:
+#         with open(sp_img_ext_loc,'r') as extF:
+#             num = extF.readlines()
+#             for i in num:
+#                 val = re.sub('\n','',i)
+#                 store.append(val)
+#             return store
+#     except BaseException as err:
+#         print(err)
+

@@ -1,1 +1,1 @@
-editSpImgExtFile(str(input('Input Command : ')))
+print

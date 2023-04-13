@@ -30,7 +30,7 @@ if __name__ != "__main__":
             pixel_data = []
 
             for i in range (img.size[1]):
-                print("Query grayscale image data in image_row_{}...".format(i+1))
+                print("Querying grayscale image data in image_row_{}...".format(i+1))
                 name = "image_row_"+str(i+1)
 
                 queryGrayScale = f"SELECT value_Gray FROM {name}"

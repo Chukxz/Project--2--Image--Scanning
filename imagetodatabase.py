@@ -19,6 +19,7 @@ if __name__ != "__main__":
 
             # Connect to a database and create a connection object
             conn = sqlite3.connect(filedb)
+
             # Create a cursor object
             cursor = conn.cursor()
             
@@ -52,11 +53,12 @@ if __name__ != "__main__":
                     #Create rudimentary grayscale value
                     gray = int((r+g+b)/3)
                     
-                    queryData = f"INSERT INTO {name} (value_R,value_G,value_B,value_Gray) VALUES ({r},{g},{b},{gray})"
+                    queryData = f"INSERT INTO {name}(value_R,value_G,value_B,value_Gray) VALUES ({r},{g},{b},{gray})"
                     cursor.execute(queryData)
 
             #Commit the changes to the database
             conn.commit()
+
             #Close the cursor and connection objects
             cursor.close()
             conn.close()
