@@ -1,4 +1,4 @@
-#Configure file location for my computetr will differ on your computer if you don't modify it.
+#Configure file location for my computer will differ on your computer if you don't modify it.
 import os
 
 def testconfigure():
