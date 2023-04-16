@@ -24,7 +24,7 @@ if __name__ != "__main__":
             cursor = conn.cursor()
             
             for hg in range(img.size[1]):
-                print("Creating image_row_{}...".format(hg+1))
+                print(f'Creating image_row_{hg+1}...')
                 #Create Image row tables
                 name = "image_row_"+str(hg+1)
                 queryChild = f"CREATE TABLE {name}(id INTEGER PRIMARY KEY)"
@@ -40,18 +40,19 @@ if __name__ != "__main__":
                 cursor.execute(queryDataHeaderG)
                 cursor.execute(queryDataHeaderB)
                 cursor.execute(queryDataHeaderGray)
+                
 
                 for wd in range(img.size[0]):
                     #Insert the values to the data_value column
-                    value = str(pixels[wd,hg])
+                    value = pixels[wd,hg]
                     modValue = loctuple.tupletolist(value)
 
-                    r = int(modValue[1])
-                    g = int(modValue[3])
-                    b = int(modValue[5])
+                    r = modValue[0]
+                    g = modValue[1]
+                    b = modValue[2]
 
                     #Create rudimentary grayscale value
-                    gray = int((r+g+b)/3)
+                    gray = round((r+g+b)/3)
                     
                     queryData = f"INSERT INTO {name}(value_R,value_G,value_B,value_Gray) VALUES ({r},{g},{b},{gray})"
                     cursor.execute(queryData)

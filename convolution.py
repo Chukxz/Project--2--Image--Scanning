@@ -1,4 +1,4 @@
-import imagetodatabase as imgdb,imagetograyscale as imggray,perbackendconfig as  perbconf,re,localfileoperations as lfo,os,sqlite3
+import imagetodatabase as imgdb,imagetograyscale as imggray,perbackendconfig as  perbconf,re,localfileoperations as lfo,os,time,imagetogaussianblur as imggblur
 from PIL import Image
 
 perbconf.configure()
@@ -11,8 +11,13 @@ class NoresValue(UserWarning): ...
 class ExitProgram(UserWarning): ...
 class NotexactlyvallistWarning(UserWarning): ...
 class EmptyString(UserWarning): ...
+class ExtensionNotSupported(UserWarning):...
 
 parentdir = os.getcwd()
+
+perbconf.configure()
+
+lfo.deletechildfolder('aurora')
 
 #get input
 def myinput():
@@ -78,33 +83,34 @@ def handleinput(value):
         except NoresmatchWarning:
             res = check(value)
             if(res!=None):
-                print("Command not found : {}\n Did you mean -{} ?".format(value,res))
+                print(f'Command not found : {value}\n Did you mean -{res} ?'.format())
             else:
-                print("Invalid input\nCommand not found : {}".format(value))
+                print(f'Invalid input\nCommand not found : {value}')
         except ExcessiveresfindallWarning:
             res = check(value)
             if(res!=None):
-                print("Command not found : {}\n Did you mean -{} ?".format(value,res))
+                print(f'Command not found : {value}\n Did you mean -{res} ?')
             else:
-                print("Invalid input\nCommand not found : {}".format(value))           
+                print(f'Invalid input\nCommand not found : {value}')           
         except NoresValue:
-            print("Invalid input\nCommand not found : {}".format(value))
+            print(f'Invalid input\nCommand not found : {value}')
         except NotinvallistWarning:
             res = check(value)
             if(res!=None):
-                print("Command not found : {}\n Did you mean -{} ?".format(value,res))
+                print(f'Command not found : {value}\n Did you mean -{res} ?')
             else:
-                print("Invalid input\nCommand not found : {}".format(value))
+                print(f'Invalid input\nCommand not found : {value}')
         except NotexactlyvallistWarning:
                 res = check(value)
-                print("Command not found : {}\n Did you mean -{} ?".format(value,res))
+                print(f'Command not found : {value}\n Did you mean -{res} ?')
         except ExitProgram:
             raise ExitProgram
         except :
             return None
 
 #main helper function: display help information
-def help():
+def  help():
+    start = time.time()
     print("   -h  basic help\n\
              -s  get image size\n\
              -d  generate database file\n\
@@ -118,6 +124,8 @@ def help():
              to add or remove multiple extensions e.g two extensions 'jiff' and 'gif', input 'add jiff gif' or input 'remove jiff gif' respecively.\n\
              Note: default image extensions are .jpg, .webp and .png and they cannot be modified by adding or removing e.g 'add jpg' or 'remove jpg'\
              will not work.")
+    print(f"Total time taken: {time.time() - start} seconds")
+
 
 def setImgFilePath(parentdir,inputimg,ext):
     inputimg_file = inputimg + '.' + ext
@@ -136,7 +144,8 @@ def getImageSize():
         ext = str(input('Enter the image file extension (.extension name eg. jpg for jpg image files): '))
         if ext == '':
             raise EmptyString
-            #copy image to appropiate folder
+        start = time.time()
+        #Copy image to appropiate folder
         lfo.copyimagefile(inputimg,ext)
         #Set image path
         img_path = setImgFilePath(parentdir,inputimg,ext)
@@ -147,6 +156,8 @@ def getImageSize():
         print(f'Image size {width} x {height}')
     except EmptyString:
         print ('Do not use empty strings in input')
+    finally:
+        print(f"Total time taken: {time.time() - start} seconds")
 
 
 def genDatabaseFile():
@@ -156,17 +167,23 @@ def genDatabaseFile():
             raise EmptyString
         ext = str(input('Enter the image file extension (.extension name eg. jpg for jpg image files): '))
         if ext == '':
-            raise EmptyString 
-        #copy image to appropiate folder
+            raise EmptyString
+        start = time.time()
+        #Copy image to appropiate folder
         lfo.copyimagefile(inputimg,ext)
         #Set Image folder path
         img_folder_path = setImgFolderPath(parentdir,inputimg)
         #Set image path
         img_file_path = setImgFilePath(parentdir,inputimg,ext)
-        #Create database
+        #Create database file
         imgdb.createTables(img_folder_path,img_file_path,inputimg)
     except EmptyString:
         print ('Do not use empty strings in input')
+    except BaseException as base_err:
+        print(base_err)
+    finally:
+        print(f"Total time taken: {time.time() - start} seconds")
+
 
 def createSpImgExtFile():
     #Image extensions path
@@ -179,11 +196,12 @@ def createSpImgExtFile():
             with open(sp_img_ext_loc,'w') as extF:
                 for i in default:
                     extF.write(f'{i}\n')
-        except BaseException as err:
-            print(err)
+        except BaseException as base_err:
+            print(base_err)
 
   
 def editSpImgExtFile(input_command):
+    start = time.time()
     createSpImgExtFile()
     default = ['jpg','png','webp']
     sp_img_ext_name = 'Supported Image Extensions.txt'
@@ -245,6 +263,7 @@ def editSpImgExtFile(input_command):
 
         except BaseException as err:
             print(err)
+    print(f"Total time taken: {time.time() - start} seconds")
 
 def getSpImgExt():
     sp_img_ext_name = 'Supported Image Extensions.txt'
@@ -259,7 +278,6 @@ def getSpImgExt():
             return store
     except BaseException as err:
         print(err)
-
 
 def verify(initial_verify_list,verifyier_list):
     sucList = []
@@ -294,7 +312,43 @@ def genGrayScaleFiles():
         gray_scale_files = str(input("Input choice of extensions for output files (eg. for jpg and png input 'jpg & png'): "))
         if gray_scale_files == '':
             raise EmptyString
-        #copy image to appropiate folder
+        start = time.time()
+        #Copy image to appropiate folder
+        lfo.copyimagefile(inputimg,ext)
+        #Set Image folder path
+        img_folder_path = setImgFolderPath(parentdir,inputimg)
+        #Set image path
+        img_file_path = setImgFilePath(parentdir,inputimg,ext)  
+        #Create database file
+        imgdb.createTables(img_folder_path,img_file_path,inputimg)
+        verify_list = re.split(r'[\s][\&][\s)]',gray_scale_files)
+        #Verify that grayscale file format is supported
+        verified = getSpImgExt()
+        #Create grayscale image files
+        for i in range(len(verify_list)):
+            if (verify_list[i] in verified):
+                imggray.createGrayScaleFile(img_folder_path,img_file_path,verify_list[i],inputimg)
+            else:
+                raise ExtensionNotSupported
+    except EmptyString:
+        print ('Do not use empty strings in input')
+    except ExtensionNotSupported:
+        print(f'{verify_list[i]} grayscale image extension not supported, supported values are {getSpImgExt()}, check extensions and try again')
+    except BaseException as base_err:
+        print(base_err)
+    finally:
+        print(f"Total time taken: {time.time() - start} seconds")
+
+def genGaussianBlurFile():
+    try:
+        inputimg = str(input('Input file: '))
+        if inputimg == '':
+            raise EmptyString
+        ext = str(input('Input file extension: '))
+        if ext == '':
+            raise EmptyString
+        start = time.time()
+        #Copy image to appropiate folder
         lfo.copyimagefile(inputimg,ext)
         #Set Image folder path
         img_folder_path = setImgFolderPath(parentdir,inputimg)
@@ -302,37 +356,45 @@ def genGrayScaleFiles():
         img_file_path = setImgFilePath(parentdir,inputimg,ext)  
         #Create database
         imgdb.createTables(img_folder_path,img_file_path,inputimg)
-        verify_list = re.split(r'[\s][\&][\s)]',gray_scale_files)
-        #verify that grayscale file format is supported
+        #Verify that grayscale file format is supported
         verified = getSpImgExt()
-        #Create grayscale files
-        if(verified):
-            for i in range(len(verify_list)):
-                imggray.createGrayScaleFile(img_folder_path,img_file_path,verify_list[i],inputimg)
+        #Create grayscale image files
+        if (ext in verified):
+            imggray.createGrayScaleFile(img_folder_path,img_file_path,ext,inputimg)
         else:
-            print(f'One or more grayscale image extension(s) not supported, supported values are {getSpImgExt()}, check extension(s) and try again')
-
+            raise ExtensionNotSupported
+        imggblur.createBlur(inputimg,ext,img_folder_path)
     except EmptyString:
-        print ('Do not use empty strings in input')    
+        print ('Do not use empty strings in input')
+    except ExtensionNotSupported:
+        print(f'{ext} grayscale image extension not supported, supported values are {getSpImgExt()}, check extensions and try again')
+    except BaseException as base_err:
+        print(base_err)
+    finally:
+        print(f"Total time taken: {time.time() - start} seconds")
+
 
 #combine all main helper functions to form a coherent output
 def organize():
-        try:
-            common = handleinput(myinput())
-            if common == "h":
-                print('>>')
-                help()
-            elif common == 's':
-                getImageSize()
-            elif common == 'd':
-                genDatabaseFile()
-            elif common == 'g':
-                genGrayScaleFiles()
-            elif common == 'm':
-                editSpImgExtFile(str(input('Input Command : ')))
-
-            organize()
-        except ExitProgram:
-            print("Program exited")
-
+    start = time.time()
+    try:
+        common = handleinput(myinput())
+        if common == "h":
+            print('>>')
+            help()
+        elif common == 's':
+            getImageSize()
+        elif common == 'd':
+            genDatabaseFile()
+        elif common == 'g':
+            genGrayScaleFiles()
+        elif common == 'b':
+            genGaussianBlurFile()
+        elif common == 'm':
+            editSpImgExtFile(str(input('Input Command : ')))
+        print(f"Total time spent in cycle: {time.time() - start} seconds")
+        organize()
+    except ExitProgram:
+        print("Program exited")
+        print(f"Total time spent in cycle: {time.time() - start} seconds")
 organize()

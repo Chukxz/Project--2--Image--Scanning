@@ -66,7 +66,7 @@ if __name__ != "__main__":
                 print(f'{dir_path} does not exist')
         except Exception as e:
             print(f"An error occured {e}")
-        
+                
     def copyimagefile(file_name,ext):
         full_file_name = file_name+"."+ext
         src_file_path = os.path.join(parentdir,'Resources','Images',full_file_name)

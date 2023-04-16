@@ -5,8 +5,8 @@ if __name__ != "__main__":
     #Configure file location for my system, modify it on yours
     perbackendconfig.configure()
 
-    def createGrayScaleFile(image_folder_path,image_file_path,gray_scale_file,img_name):
-        grayscaleimage = f"{img_name} Grayscale."+gray_scale_file
+    def createGrayScaleFile(image_folder_path,image_file_path,gray_scale_ext,img_name):
+        grayscaleimage = f"{img_name} Grayscale."+gray_scale_ext
         grayscaleimageloc = os.path.join(image_folder_path,grayscaleimage)
         if not os.path.exists(grayscaleimageloc):
             print("Opening image and getting image data...")
@@ -30,17 +30,15 @@ if __name__ != "__main__":
             pixel_data = []
 
             for i in range (img.size[1]):
-                print("Querying grayscale image data in image_row_{}...".format(i+1))
+                print(f'Querying grayscale image data in image_row_{i+1}...')   
                 name = "image_row_"+str(i+1)
 
                 queryGrayScale = f"SELECT value_Gray FROM {name}"
-                cursor.execute(queryGrayScale)
 
-                rows = cursor.fetchall()
-                for row in rows:
-                    modrow = loctuple.tupletolist(row)
-                    pixel_value = (int(modrow[1]),int(modrow[1]),int(modrow[1]))
-                    pixel_data.append(pixel_value)     
+                for row in cursor.execute(queryGrayScale):
+                    gray = loctuple.tupletolist(row)[0]
+                    pixel_value = (gray,gray,gray)
+                    pixel_data.append(pixel_value)    
 
 
             conn.commit()
@@ -53,7 +51,7 @@ if __name__ != "__main__":
             image = Image.new('RGB',(img.size[0],img.size[1]))
 
             #Set the pixel values for the image
-            image.putdata(pixel_data)
+            image.putdata(pixel_data)   
 
             #Save the image file
             image.save(grayscaleimageloc)
