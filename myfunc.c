@@ -8,7 +8,7 @@ int main(int argc, char* argv[]){
     file = "Resources/Generated_Images/Pipe Puzzle/Pipe Puzzle Pixel.db";
 
     sqlite3 * db;
-    char *zErrMsg = 0;
+    // char *zErrMsg = 0;
     int rc;
     rc = sqlite3_open(file, &db);
 

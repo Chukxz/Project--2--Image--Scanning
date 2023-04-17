@@ -42,12 +42,15 @@
 
 
 # getImageSize()
-import os
+import os,perbackendconfig as pb,ctypes
+from ctypes import util
 from ctypes import *
+
+pb.configure()
 
 parentdir = os.getcwd()
 
-if not os.path.exists("./try.sh") or not os.path.exists("./example2.so"):
+if not os.path.exists("./try.sh") or not os.path.exists("./myfunc.so"):
     import subprocess
     #This is our shell command
 
@@ -58,10 +61,10 @@ if not os.path.exists("./try.sh") or not os.path.exists("./example2.so"):
     with subprocess.Popen("sh try.sh", stdout = subprocess.PIPE, shell=True) as proc:
         print(proc.stdout.read())
 
-so_path = os.path.join(parentdir,"example2.so") 
+so_path = os.path.join(parentdir,"myfunc.so") 
 
-so_file = "./example2.so"
+example2 = CDLL('./myfunc.so')
 
-examples = CDLL(so_file)
+print(type(example2))
 
-print(type(examples))
+print(util.find_library('myfunc.so'))
