@@ -18,7 +18,7 @@ if __name__ != "__main__":
 
             pixel_data = []
 
-            filedb = os.path.join(image_folder_path,f' {img_name} Pixel.db')
+            filedb = os.path.join(image_folder_path,f'{img_name} Pixel.db')
 
             print("Opening image pixel database and getting database data...")
 

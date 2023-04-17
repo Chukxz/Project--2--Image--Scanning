@@ -6,7 +6,7 @@ if __name__ != "__main__":
     perbackendconfig.configure()
 
     def createTables(image_folder_path,image_file_path,img_name):
-        filedb = os.path.join(image_folder_path,f' {img_name} Pixel.db')
+        filedb = os.path.join(image_folder_path,f'{img_name} Pixel.db')
 
         if not os.path.exists(filedb):
             print("Opening image and getting image data...")

@@ -353,7 +353,9 @@ def genGaussianBlurFile():
         #Set Image folder path
         img_folder_path = setImgFolderPath(parentdir,inputimg)
         #Set image path
-        img_file_path = setImgFilePath(parentdir,inputimg,ext)  
+        img_file_path = setImgFilePath(parentdir,inputimg,ext)
+        print(img_folder_path)
+        print(img_file_path)  
         #Create database
         imgdb.createTables(img_folder_path,img_file_path,inputimg)
         #Verify that grayscale file format is supported
