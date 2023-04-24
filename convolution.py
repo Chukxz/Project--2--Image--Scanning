@@ -1,4 +1,4 @@
-import imagetodatabase as imgdb,imagetograyscale as imggray,perbackendconfig as  perbconf,re,localfileoperations as lfo,os,time,imagetogaussianblur as imggblur
+import imagetodatabase as imgdb,imagetograyscale as imggray,perbackendconfig as  perbconf,re,localfileoperations as lfo,os,time,imagetogaussianblur as imggblur,loctuple as loc
 from PIL import Image
 
 perbconf.configure()
@@ -13,11 +13,11 @@ class NotexactlyvallistWarning(UserWarning): ...
 class EmptyString(UserWarning): ...
 class ExtensionNotSupported(UserWarning):...
 
-parentdir = os.getcwd()
+# parentdir = os.getcwd()
 
 perbconf.configure()
 
-lfo.deletechildfolder('aurora')
+# re.sub(r"\\","/",filestr)
 
 #get input
 def myinput():
@@ -127,13 +127,13 @@ def  help():
     print(f"Total time taken: {time.time() - start} seconds")
 
 
-def setImgFilePath(parentdir,inputimg,ext):
+def setImgFilePath(inputimg,ext):
     inputimg_file = inputimg + '.' + ext
-    img_file_path =os.path.join(parentdir,'Resources','Generated_Images',inputimg,inputimg_file)
+    img_file_path =os.path.join('Resources','Generated_Images',inputimg,inputimg_file)
     return img_file_path
 
-def setImgFolderPath(parentdir,inputimg):
-    img_folder_path = os.path.join(parentdir,'Resources','Generated_Images',inputimg)
+def setImgFolderPath(inputimg):
+    img_folder_path = os.path.join('Resources','Generated_Images',inputimg)
     return img_folder_path
     
 def getImageSize():
@@ -147,13 +147,24 @@ def getImageSize():
         start = time.time()
         #Copy image to appropiate folder
         lfo.copyimagefile(inputimg,ext)
+        #Set Image folder path
+        img_folder_path = setImgFolderPath(inputimg)
         #Set image path
-        img_path = setImgFilePath(parentdir,inputimg,ext)
+        img_path = setImgFilePath(inputimg,ext)
         # Open image file
         img = Image.open(img_path)
         # Get the size of the image
         width,height = img.size
+        pixels = img.load()
         print(f'Image size {width} x {height}')
+        with open(img_folder_path+f"/store.txt","w") as store:
+            store.write(f"{width}\n{height}\n")
+            for i in range(height):
+                for j in range(width):
+                    if((height-1==i) and (width-1==j)):
+                        store.write(f"{pixels[j,i]}");
+                    else:
+                        store.write(f"{pixels[j,i]}\n")
     except EmptyString:
         print ('Do not use empty strings in input')
     finally:
@@ -172,11 +183,11 @@ def genDatabaseFile():
         #Copy image to appropiate folder
         lfo.copyimagefile(inputimg,ext)
         #Set Image folder path
-        img_folder_path = setImgFolderPath(parentdir,inputimg)
+        img_folder_path = setImgFolderPath(inputimg)
         #Set image path
-        img_file_path = setImgFilePath(parentdir,inputimg,ext)
+        img_file_path = setImgFilePath(inputimg,ext)
         #Create database file
-        imgdb.createTables(img_folder_path,img_file_path,inputimg)
+        imgdb.createTables(img_folder_path,img_file_path)
     except EmptyString:
         print ('Do not use empty strings in input')
     except BaseException as base_err:
@@ -188,7 +199,7 @@ def genDatabaseFile():
 def createSpImgExtFile():
     #Image extensions path
     sp_img_ext_name = "Supported Image Extensions"
-    sp_img_ext_loc = os.path.join(parentdir, f'{sp_img_ext_name}.txt')
+    sp_img_ext_loc = os.path.join(f'{sp_img_ext_name}.txt')
     default = ['jpg','png','webp']
 
     if not os.path.exists(sp_img_ext_loc):
@@ -205,7 +216,7 @@ def editSpImgExtFile(input_command):
     createSpImgExtFile()
     default = ['jpg','png','webp']
     sp_img_ext_name = 'Supported Image Extensions.txt'
-    sp_img_ext_loc = os.path.join(parentdir,sp_img_ext_name)
+    sp_img_ext_loc = os.path.join(sp_img_ext_name)
     generated_commands =  re.split(' ',input_command)
 
     store = []
@@ -267,7 +278,7 @@ def editSpImgExtFile(input_command):
 
 def getSpImgExt():
     sp_img_ext_name = 'Supported Image Extensions.txt'
-    sp_img_ext_loc = os.path.join(parentdir,sp_img_ext_name)
+    sp_img_ext_loc = os.path.join(sp_img_ext_name)
     store = []
     try:
         with open(sp_img_ext_loc,'r') as extF:
@@ -316,18 +327,18 @@ def genGrayScaleFiles():
         #Copy image to appropiate folder
         lfo.copyimagefile(inputimg,ext)
         #Set Image folder path
-        img_folder_path = setImgFolderPath(parentdir,inputimg)
+        img_folder_path = setImgFolderPath(inputimg)
         #Set image path
-        img_file_path = setImgFilePath(parentdir,inputimg,ext)  
+        img_file_path = setImgFilePath(inputimg,ext)  
         #Create database file
-        imgdb.createTables(img_folder_path,img_file_path,inputimg)
+        imgdb.createTables(img_folder_path,img_file_path)
         verify_list = re.split(r'[\s][\&][\s)]',gray_scale_files)
         #Verify that grayscale file format is supported
         verified = getSpImgExt()
         #Create grayscale image files
         for i in range(len(verify_list)):
             if (verify_list[i] in verified):
-                imggray.createGrayScaleFile(img_folder_path,img_file_path,verify_list[i],inputimg)
+                imggray.createGrayScaleFile(img_folder_path,img_file_path,verify_list[i])
             else:
                 raise ExtensionNotSupported
     except EmptyString:
@@ -351,21 +362,21 @@ def genGaussianBlurFile():
         #Copy image to appropiate folder
         lfo.copyimagefile(inputimg,ext)
         #Set Image folder path
-        img_folder_path = setImgFolderPath(parentdir,inputimg)
+        img_folder_path = setImgFolderPath(inputimg)
         #Set image path
-        img_file_path = setImgFilePath(parentdir,inputimg,ext)
+        img_file_path = setImgFilePath(inputimg,ext)
         print(img_folder_path)
         print(img_file_path)  
         #Create database
-        imgdb.createTables(img_folder_path,img_file_path,inputimg)
+        imgdb.createTables(img_folder_path,img_file_path)
         #Verify that grayscale file format is supported
         verified = getSpImgExt()
         #Create grayscale image files
         if (ext in verified):
-            imggray.createGrayScaleFile(img_folder_path,img_file_path,ext,inputimg)
+            imggray.createGrayScaleFile(img_folder_path,img_file_path,ext)
         else:
             raise ExtensionNotSupported
-        imggblur.createBlur(inputimg,ext,img_folder_path)
+        imggblur.createBlur(ext,img_folder_path)
     except EmptyString:
         print ('Do not use empty strings in input')
     except ExtensionNotSupported:

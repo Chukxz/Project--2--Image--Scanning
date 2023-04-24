@@ -5,8 +5,8 @@ if __name__ != "__main__":
     #Configure file location for my system, modify it on yours
     perbackendconfig.configure()
 
-    def createGrayScaleFile(image_folder_path,image_file_path,gray_scale_ext,img_name):
-        grayscaleimage = f"{img_name} Grayscale."+gray_scale_ext
+    def createGrayScaleFile(image_folder_path,image_file_path,gray_scale_ext):
+        grayscaleimage = "Grayscale."+gray_scale_ext
         grayscaleimageloc = os.path.join(image_folder_path,grayscaleimage)
         if not os.path.exists(grayscaleimageloc):
             print("Opening image and getting image data...")
@@ -18,7 +18,7 @@ if __name__ != "__main__":
 
             pixel_data = []
 
-            filedb = os.path.join(image_folder_path,f'{img_name} Pixel.db')
+            filedb = os.path.join(image_folder_path,"Pixel.db")
 
             print("Opening image pixel database and getting database data...")
 

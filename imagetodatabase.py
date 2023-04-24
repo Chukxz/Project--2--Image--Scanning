@@ -1,12 +1,21 @@
 if __name__ != "__main__":
-    import sqlite3,loctuple, perbackendconfig,os
+    import sqlite3,loctuple, perbackendconfig,os,re
     from PIL import Image
 
     #Configure file location for my system, modify it on yours
     perbackendconfig.configure()
 
-    def createTables(image_folder_path,image_file_path,img_name):
-        filedb = os.path.join(image_folder_path,f'{img_name} Pixel.db')
+    def convert(file_path):
+        return re.sub(r"\\","/",file_path)
+
+    def createTables(image_folder_path,image_file_path):
+        filedb = os.path.join(image_folder_path,"Pixel.db")
+
+        print(filedb);
+
+        
+        with open('lookup.txt','w',encoding='utf-8') as l:
+            l.writelines(f'{convert(filedb)}\n')
 
         if not os.path.exists(filedb):
             print("Opening image and getting image data...")
@@ -67,3 +76,4 @@ if __name__ != "__main__":
             print("Database generation completed")
         else:
             print(f'{filedb} already exists in {image_folder_path}')
+        
