@@ -1,23 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-char returnLine(int lineValue, char *filename1){
+char * _return_line_value_(int lineValue, char *filename, char * buffer){
 
-    FILE * fptr = fopen(filename1,"r");
-
+    FILE * fptr = fopen(filename    ,"r");
     if(fptr == NULL){
         printf("Error opening file!");
         // Program exits if the file pointer returns NULL.
-        return -1;
+        exit(1);
     }
-
-    char buffer[100];
 
     for(int i=1; i<=lineValue; i++){
         fgets(buffer,100,fptr);
     }
 
     fclose(fptr);
-    return *(buffer);
+    return buffer;
 }

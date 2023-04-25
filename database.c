@@ -2,13 +2,17 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <string.h>
+#include "./test.h"
+#include "./testing.h"
 
-int createDatabase(int width, int height){
-    
+
+int createDatabase(int width, int height,char mod_file_location[],char * buf){
+
     sqlite3 * db;
     char *err_msg = 0;
     int rc;
-    rc = sqlite3_open("Pixel.db", &db);
+    rc = sqlite3_open(mod_file_location, &db);
+    int * contain = malloc(100);
 
     if (rc != SQLITE_OK){
         fprintf(stderr,"Can't open database: %s\n", sqlite3_errmsg(db));
@@ -25,7 +29,7 @@ int createDatabase(int width, int height){
         char* my_table = name;
 
         //Construct the SQL command to create the table
-        char* sql_create = malloc(strlen(my_table) + 50 + 25 * 4);
+        char* sql_create =  malloc(strlen(my_table) + 50 + 25 * 4);
         sprintf(sql_create, "CREATE TABLE %s (id INTEGER PRIMARY KEY, ", my_table);
 
         char col_name_R[15] = "value_";
@@ -82,7 +86,12 @@ int createDatabase(int width, int height){
         
         char * sql_insert = malloc(strlen(my_table) + 30 + 150 * width);
         for (int i = 0; i < width; i++){
-            sprintf(sql_insert, "INSERT INTO %s (id, ",my_table);
+
+            char stores[100];
+            snprintf(stores,sizeof(stores),"%s", (_return_line_value_(1000,mod_file_location,buf)));
+            contain = getValues(4,mod_file_location,buf,contain,stores);
+
+            sprintf(sql_insert, "INSERT INTO %s (id",my_table);
             
             strcat(sql_insert,", ");
             strcat(sql_insert,my_col_R);
@@ -93,13 +102,26 @@ int createDatabase(int width, int height){
             strcat(sql_insert,", ");
             strcat(sql_insert, my_col_Gray);
 
-            strcat(sql_insert,(") VALUES (%d", i + 1));//More work to be done here on the values
+            strcat(sql_insert, ") VALUES (");
+            char id_index[10];
+            sprintf(id_index,"%i",i+1);
+            strcat(sql_insert,id_index);
             for (int j = 0; j < 4; j++){
-                char col_value[20];
-
-                strcat(sql_insert,", '");
-                strcat(sql_insert, col_value);
-                strcat(sql_insert,"'");
+                char contain_str[10];
+                if(j==3){
+                    contain[3] = (contain[1] + contain[2] + contain[3])/3;
+                        sprintf(contain_str,"%i",contain[i]);
+                        strcat(sql_insert,", '");
+                        strcat(sql_insert,contain_str);
+                        strcat(sql_insert,"'");
+                }
+                
+                else{
+                    sprintf(contain_str,"%i",contain[i]);
+                    strcat(sql_insert,", '");
+                    strcat(sql_insert,contain_str);
+                    strcat(sql_insert,"', ");
+                }
             }
             strcat(sql_insert, ");");
         }
@@ -132,24 +154,11 @@ int createDatabase(int width, int height){
 
             //Construct the SQL command to insert the rows
         
-        free(name);
-        free(name_end);
-        free(col_name_R);
-        free(col_name_G);
-        free(col_name_B);
-        free(col_name_Gray);
-        free(col_name_end_R);
-        free(col_name_end_G);
-        free(col_name_end_B);
-        free(col_name_end_Gray);
-        free(my_col_R);
-        free(my_col_G);
-        free(my_col_B);
-        free(my_col_Gray);
-        free(my_table);
+        
+        sqlite3_free(err_msg);
         free(sql_create);
         free(sql_insert);
-        free(err_msg);
+        free(contain);
     }
 
     sqlite3_close(db);
@@ -160,45 +169,28 @@ int createDatabase(int width, int height){
 }
 
 int main(int argc, char * argv[]){
+
+    char * buf = malloc(100);
+    char file_location[1024];
+    char mod_file_location[1024];
+    char buffer1[100];
+    char buffer2[100];
+
+    FILE * fptr = fopen("lookup.txt","r");
+
+    if(fptr == NULL){
+        printf("Error opening file!");
+        // Program exits if the file pointer returns NULL.
+        return -1;
+    }
+
+    fgets(file_location,1024,fptr);
+    fclose(fptr);
+    snprintf(mod_file_location,strlen(file_location),"%s",file_location);
+
+    snprintf(buffer1,sizeof(buffer1),"%s", (_return_line_value_(1,mod_file_location,buf)));
     
-    char *filename1 = "./store1.txt";
-    char *filename2 = "./store2.txt";
-
-    FILE * fptr1 = fopen(filename1,"r");
-
-    if(fptr1 == NULL){
-        printf("Error opening file!");
-        // Program exits if the file pointer returns NULL.
-        return -1;
-    }
-
-    fseek(fptr1,0,SEEK_END);
-    long size1 = ftell(fptr1);
-    fseek(fptr1,0,SEEK_SET);
-
-    char * buffer1 = malloc(size1);
-
-    fread(buffer1,1,size1,fptr1);
-
-    fclose(fptr1);
-
-    FILE * fptr2 = fopen(filename2,"r");
-
-    if(fptr2 == NULL){
-        printf("Error opening file!");
-        // Program exits if the file pointer returns NULL.
-        return -1;
-    }
-
-    fseek(fptr2,0,SEEK_END);
-    long size2 = ftell(fptr2);
-    fseek(fptr2,0,SEEK_SET);
-
-    char * buffer2 = malloc(size2);
-
-    fread(buffer2,1,size2,fptr2);
-
-    fclose(fptr2);
+    snprintf(buffer2,sizeof(buffer1),"%s", (_return_line_value_(2,mod_file_location,buf)));
 
     int buffer1_int = (int) strtol(buffer1,NULL,10);
 
@@ -206,5 +198,7 @@ int main(int argc, char * argv[]){
 
     printf("%d + %d = %d\n",buffer1_int,buffer2_int,buffer1_int+buffer2_int);
 
-    createDatabase(buffer1_int,buffer2_int);
+    createDatabase(buffer1_int,buffer2_int,mod_file_location,buf);
+
+    free(buf);
 }

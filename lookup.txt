@@ -1,1 +1,1 @@
-Resources/Generated_Images/Colored_Wolf/Pixel.db
+./Resources/Generated_Images/Black Hole/store.txt
