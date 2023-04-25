@@ -8,14 +8,15 @@ if __name__ != "__main__":
     def convert(file_path):
         return re.sub(r"\\","/",file_path)
 
-    def createTables(image_folder_path,image_file_path):
-        filedb = os.path.join(image_folder_path,"Pixel.db")
+    def createTables(image_folder_path,image_file_path,img_name):
+        filedb = os.path.join(image_folder_path,f'{img_name} Pixel.db')
+
+        pass_to_c = os.path.join(image_folder_path,img_name)
+
+        with open('lookup.txt','w',encoding='utf-8') as l:
+            l.writelines(f'{convert(pass_to_c)}')
 
         print(filedb);
-
-        
-        with open('lookup.txt','w',encoding='utf-8') as l:
-            l.writelines(f'{convert(filedb)}\n')
 
         if not os.path.exists(filedb):
             print("Opening image and getting image data...")
@@ -33,7 +34,7 @@ if __name__ != "__main__":
             cursor = conn.cursor()
             
             for hg in range(img.size[1]):
-                print(f'Creating image_row_{hg+1}...')
+                # print(f'Creating image_row_{hg+1}...')
                 #Create Image row tables
                 name = "image_row_"+str(hg+1)
                 queryChild = f"CREATE TABLE {name}(id INTEGER PRIMARY KEY)"

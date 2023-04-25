@@ -1,1 +1,1 @@
-./Resources/Generated_Images/Black Hole/store.txt
+Resources/Generated_Images/Black Hole/Black Hole

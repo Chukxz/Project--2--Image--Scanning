@@ -1,6 +1,7 @@
 if __name__ != "__main__":
-    import loctuple, perbackendconfig,os,math, numpy as np
+    import loctuple, perbackendconfig,os,numpy as np
     from PIL import Image
+    from math import e,pow,pi
 
     #Configure img_name location for my system, modify it on yours
     perbackendconfig.configure()
@@ -9,13 +10,13 @@ if __name__ != "__main__":
         # Mean (mu) = 0, so it is not included in the variables,
         # but Standard deviation (sigma) is included
 
-        base_expr = 1/(2*(math.pow(sigma,2))*math.pi)
+        base_expr = 1/(2*(pow(sigma,2))*pi)
 
-        power_expr_x = math.pow(x,2)/math.pow(sigma,2)
-        expr_x = math.pow(math.e,-power_expr_x)
+        power_expr_x = pow(x,2)/pow(sigma,2)
+        expr_x = pow(e,-power_expr_x)
 
-        power_expr_y = math.pow(y,2)/math.pow(sigma,2)
-        expr_y = math.pow(math.e,-power_expr_y)
+        power_expr_y = pow(y,2)/pow(sigma,2)
+        expr_y = pow(e,-power_expr_y)
 
         final_expr = scale * base_expr * expr_x * expr_y
         return final_expr
@@ -31,8 +32,8 @@ if __name__ != "__main__":
                 row.append(column)
             return row
             
-    def createBlur(ext,img_folder_path,kernel_size=5,sigma=4.5, scale = 100):
-            grayScaleImgFile = "Grayscale."+ext
+    def createBlur(ext,img_folder_path,img_name,kernel_size=5,sigma=4.5, scale = 100):
+            grayScaleImgFile = f"{img_name} Grayscale."+ext
             img_file_path = os.path.join(img_folder_path,grayScaleImgFile)
             g_blur_image = "Grayscale_Blur."+ext
             g_blur_image_loc = os.path.join(img_folder_path,g_blur_image)
@@ -48,7 +49,7 @@ if __name__ != "__main__":
                 
                 if kernel_size>=0 and kernel_size<=min(width,height) and kernel_size%2==1:
                     for hg in range(img.size[1]):
-                        print(f'Generating blurred image row {hg+1}')
+                        # print(f'Generating blurred image row {hg+1}')
                         for wd in range(img.size[0]):       
                             row = []
                             for j in range(kernel_size):
@@ -68,7 +69,7 @@ if __name__ != "__main__":
                                         coord_y = height-1
                                     column.append(loctuple.tupletolist(pixels[coord_x,coord_y])[0]*kernel_set[i][j])
                                 row.append(column)
-                            result = round(np.sum(row)/(math.pow(kernel_size,2)))
+                            result = round(np.sum(row)/(pow(kernel_size,2)))
                             if result>255:
                                 result = 255
                             pixel_value = (result,result,result)
@@ -78,8 +79,8 @@ if __name__ != "__main__":
                 #Create an new image with the desired dimensions
                 image = Image.new('RGB',(img.size[0],img.size[1]))
 
-                #Set the pixel values for the image
-                image.putdata(pixel_data)
+                #Setpixel values for the image
+                image.putdata(pixel_data,)
 
                 #Save the image img_name
                 image.save(g_blur_image_loc)

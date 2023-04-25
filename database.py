@@ -21,7 +21,7 @@ def create_database(image_pixel_width,image_pixel_height):
 
     initiate_database(width,height)
 
-    # os.chdir("../../../")
+    os.chdir("../../../")
 
     print(os.getcwd())
 

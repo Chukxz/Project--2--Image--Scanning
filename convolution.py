@@ -147,24 +147,14 @@ def getImageSize():
         start = time.time()
         #Copy image to appropiate folder
         lfo.copyimagefile(inputimg,ext)
-        #Set Image folder path
-        img_folder_path = setImgFolderPath(inputimg)
         #Set image path
         img_path = setImgFilePath(inputimg,ext)
         # Open image file
         img = Image.open(img_path)
         # Get the size of the image
         width,height = img.size
-        pixels = img.load()
         print(f'Image size {width} x {height}')
-        with open(img_folder_path+f"/store.txt","w") as store:
-            store.write(f"{width}\n{height}\n")
-            for i in range(height):
-                for j in range(width):
-                    if((height-1==i) and (width-1==j)):
-                        store.write(f"{pixels[j,i]}");
-                    else:
-                        store.write(f"{pixels[j,i]}\n")
+
     except EmptyString:
         print ('Do not use empty strings in input')
     finally:
@@ -187,7 +177,7 @@ def genDatabaseFile():
         #Set image path
         img_file_path = setImgFilePath(inputimg,ext)
         #Create database file
-        imgdb.createTables(img_folder_path,img_file_path)
+        imgdb.createTables(img_folder_path,img_file_path,inputimg)
     except EmptyString:
         print ('Do not use empty strings in input')
     except BaseException as base_err:
@@ -331,14 +321,14 @@ def genGrayScaleFiles():
         #Set image path
         img_file_path = setImgFilePath(inputimg,ext)  
         #Create database file
-        imgdb.createTables(img_folder_path,img_file_path)
+        imgdb.createTables(img_folder_path,img_file_path,inputimg)
         verify_list = re.split(r'[\s][\&][\s)]',gray_scale_files)
         #Verify that grayscale file format is supported
         verified = getSpImgExt()
         #Create grayscale image files
         for i in range(len(verify_list)):
             if (verify_list[i] in verified):
-                imggray.createGrayScaleFile(img_folder_path,img_file_path,verify_list[i])
+                imggray.createGrayScaleFile(img_folder_path,img_file_path,verify_list[i],inputimg)
             else:
                 raise ExtensionNotSupported
     except EmptyString:
@@ -368,15 +358,15 @@ def genGaussianBlurFile():
         print(img_folder_path)
         print(img_file_path)  
         #Create database
-        imgdb.createTables(img_folder_path,img_file_path)
+        imgdb.createTables(img_folder_path,img_file_path,inputimg)
         #Verify that grayscale file format is supported
         verified = getSpImgExt()
         #Create grayscale image files
         if (ext in verified):
-            imggray.createGrayScaleFile(img_folder_path,img_file_path,ext)
+            imggray.createGrayScaleFile(img_folder_path,img_file_path,ext,inputimg)
         else:
             raise ExtensionNotSupported
-        imggblur.createBlur(ext,img_folder_path)
+        imggblur.createBlur(ext,img_folder_path,inputimg)
     except EmptyString:
         print ('Do not use empty strings in input')
     except ExtensionNotSupported:

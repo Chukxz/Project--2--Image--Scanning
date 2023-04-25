@@ -4,14 +4,15 @@
 #include <string.h>
 #include "./test.h"
 #include "./testing.h"
+#include "unistd.h"
 
 
-int createDatabase(int width, int height,char mod_file_location[],char * buf){
+int createDatabase(int width, int height,char * mod_file_location1,char * buf){
 
     sqlite3 * db;
     char *err_msg = 0;
     int rc;
-    rc = sqlite3_open(mod_file_location, &db);
+    rc = sqlite3_open("Pixel.db", &db);
     int * contain = malloc(100);
 
     if (rc != SQLITE_OK){
@@ -88,8 +89,8 @@ int createDatabase(int width, int height,char mod_file_location[],char * buf){
         for (int i = 0; i < width; i++){
 
             char stores[100];
-            snprintf(stores,sizeof(stores),"%s", (_return_line_value_(1000,mod_file_location,buf)));
-            contain = getValues(4,mod_file_location,buf,contain,stores);
+            snprintf(stores,sizeof(stores),"%s", (_return_line_value_(1000,mod_file_location1,buf)));
+            contain = getValues(4,mod_file_location1,buf,contain,stores);
 
             sprintf(sql_insert, "INSERT INTO %s (id",my_table);
             
@@ -171,8 +172,10 @@ int createDatabase(int width, int height,char mod_file_location[],char * buf){
 int main(int argc, char * argv[]){
 
     char * buf = malloc(100);
-    char file_location[1024];
-    char mod_file_location[1024];
+    char file_location1[1024];
+    char file_location2[1024];
+    char mod_file_location1[1024];
+    char mod_file_location2[1024];
     char buffer1[100];
     char buffer2[100];
 
@@ -184,13 +187,20 @@ int main(int argc, char * argv[]){
         return -1;
     }
 
-    fgets(file_location,1024,fptr);
-    fclose(fptr);
-    snprintf(mod_file_location,strlen(file_location),"%s",file_location);
+    for(int i=1; i<=1; i++){
+        fgets(file_location1,1024,fptr);
+    }
 
-    snprintf(buffer1,sizeof(buffer1),"%s", (_return_line_value_(1,mod_file_location,buf)));
-    
-    snprintf(buffer2,sizeof(buffer1),"%s", (_return_line_value_(2,mod_file_location,buf)));
+    for(int i=1; i<=2; i++){
+        fgets(file_location2,100,fptr);
+    }
+    fclose(fptr);
+
+    snprintf(mod_file_location1,strlen(file_location1),"%s",file_location1);
+    snprintf(mod_file_location2,strlen(file_location2),"%s",file_location2);
+
+    snprintf(buffer1,sizeof(buffer1),"%s", (_return_line_value_(1,mod_file_location1,buf)));    
+    snprintf(buffer2,sizeof(buffer2),"%s", (_return_line_value_(2,mod_file_location1,buf)));
 
     int buffer1_int = (int) strtol(buffer1,NULL,10);
 
@@ -198,7 +208,20 @@ int main(int argc, char * argv[]){
 
     printf("%d + %d = %d\n",buffer1_int,buffer2_int,buffer1_int+buffer2_int);
 
-    createDatabase(buffer1_int,buffer2_int,mod_file_location,buf);
+    
+    char s[100];
+
+    printf("%s\n",getcwd(s, 100));
+
+    chdir(mod_file_location2);
+
+    printf("%s\n",getcwd(s, 100));
+
+    createDatabase(buffer1_int,buffer2_int,mod_file_location1,buf);
 
     free(buf);
+
+    chdir("../../../");
+
+    printf("%s\n",getcwd(s, 100));
 }
