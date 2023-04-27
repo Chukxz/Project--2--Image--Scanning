@@ -1,7 +1,10 @@
-import imagetodatabase as imgdb,imagetograyscale as imggray,perbackendconfig as  perbconf,re,localfileoperations as lfo,os,time,imagetogaussianblur as imggblur,loctuple as loc
+from perbackendconfig import configure
+from os import path
+from re import sub,match,findall,split
+from time import time
+from imageedgedetection import detectEdges
 from PIL import Image
-
-perbconf.configure()
+from localfileoperations import copyimagefile, deletechildfolder
 
 #Create error classes inheriting from the built in UserWarning class
 class NoresmatchWarning(UserWarning): ...
@@ -11,13 +14,11 @@ class NoresValue(UserWarning): ...
 class ExitProgram(UserWarning): ...
 class NotexactlyvallistWarning(UserWarning): ...
 class EmptyString(UserWarning): ...
-class ExtensionNotSupported(UserWarning):...
+class ImageExtensionNotSupported(UserWarning):...
+class BrokenImageFile(UserWarning):...
 
-# parentdir = os.getcwd()
 
-perbconf.configure()
-
-# re.sub(r"\\","/",filestr)
+configure()
 
 #get input
 def myinput():
@@ -26,22 +27,22 @@ def myinput():
 
 #check validity of input and generate errors as neccessary
 class MatchIt:
-    def __init__(self,input,vallist=['h','s','d','g','w','b','e','c','m']):
+    def __init__(self,input,vallist=['h','s','e','c','u','m']):
         self.input = input
         self.res = ''
 
         if self.input == 'exit':
             raise ExitProgram
 
-        resmatch = re.match(r'-',self.input)
+        resmatch = match(r'-',self.input)
         if resmatch == None:
             raise NoresmatchWarning
         
-        resfindall = re.findall(r"-",self.input)
+        resfindall = findall(r"-",self.input)
         if resfindall.count("-")>1:
             raise ExcessiveresfindallWarning
         
-        self.res = re.sub("-",'',self.input)
+        self.res = sub("-",'',self.input)
         if self.res == '':
             raise NoresValue
         else:
@@ -49,7 +50,7 @@ class MatchIt:
                 raise NotinvallistWarning
             else:
                 ret = None
-                res = re.match(r'(\w\s*)\Z',self.res)
+                res = match(r'(\w\s*)\Z',self.res)
                 for i in  range(len(vallist)):
                     if res:
                         val = self.res[0]                            
@@ -62,11 +63,11 @@ class MatchIt:
     def res_value(self):
         return self.res  
 
-#work on errors generated in validating input if any and display the error cause and suggestions for troubleshooting
-def check(value,vallist=['h','s','d','g','w','b','e','c']):
-    localvalue = re.match('(-|\s)*\w',value)
+#Work on errors generated in validating input if any and display the error cause and suggestions for troubleshooting
+def check(value,vallist=['h','s','e','c','u','m']):
+    localvalue = match('(-|\s)*\w',value)
     if localvalue != None:
-        premodlocalvalue = re.split('',str(localvalue.group()))
+        premodlocalvalue = split('',str(localvalue.group()))
         modlen = len(premodlocalvalue)
         modlocalvalue = premodlocalvalue[modlen-2].lower()
         for i in vallist:
@@ -75,7 +76,7 @@ def check(value,vallist=['h','s','d','g','w','b','e','c']):
     else:
         return None
 
-#handle input and all associated errors, error causes and suggestion for trouble shooting if any and return final input value for further processing
+#Handle input and all associated errors, error causes and suggestion for trouble shooting if any and return final input value for further processing
 def handleinput(value):
         try:
             MatchIt(value).res_value()
@@ -110,89 +111,36 @@ def handleinput(value):
 
 #main helper function: display help information
 def  help():
-    start = time.time()
-    print("   -h  basic help\n\
+    start = time()
+    print("\
+             -h  basic help\n\
              -s  get image size\n\
-             -d  generate database file\n\
-             -g  generate grayscale in specified formats\n\
-             -w  generate gaussian blur without grayscale\n\
-             -b  generate gaussian blur with grayscale (recommended if file is to be used for further image processing)\n\
-             -e  generate sobel edge detection image\n\
-             -c  generate canny edge image\n\
+             -e  generate edge detection image\n\
+             -c  create a copy of the image with a different extension\n\
              -u  use GUI interface\n\
-             -m modify supported image extensions list e.g to add 'jiff' and , input 'add jiff', to remove 'jiff', input 'remove jiff'\n\
+             -m  modify supported image extensions list e.g to add 'jiff' and , input 'add jiff', to remove 'jiff', input 'remove jiff'\n\
              to add or remove multiple extensions e.g two extensions 'jiff' and 'gif', input 'add jiff gif' or input 'remove jiff gif' respecively.\n\
-             Note: default image extensions are .jpg, .webp and .png and they cannot be modified by adding or removing e.g 'add jpg' or 'remove jpg'\
+             Note: default image extensions are .jpg, .webp and .png and they cannot be modified by adding or removing e.g 'add jpg' or 'remove jpg'\n\
              will not work.")
-    print(f"Total time taken: {time.time() - start} seconds")
+    print(f"Total time taken: {time() - start} seconds")
 
 
 def setImgFilePath(inputimg,ext):
     inputimg_file = inputimg + '.' + ext
-    img_file_path =os.path.join('Resources','Generated_Images',inputimg,inputimg_file)
+    img_file_path =path.join('Resources','Generated_Images',inputimg,inputimg_file)
     return img_file_path
 
 def setImgFolderPath(inputimg):
-    img_folder_path = os.path.join('Resources','Generated_Images',inputimg)
+    img_folder_path = path.join('Resources','Generated_Images',inputimg)
     return img_folder_path
-    
-def getImageSize():
-    try:
-        inputimg = str(input("Enter image file (don't enter extension): "))
-        if inputimg == '':
-            raise EmptyString
-        ext = str(input('Enter the image file extension (.extension name eg. jpg for jpg image files): '))
-        if ext == '':
-            raise EmptyString
-        start = time.time()
-        #Copy image to appropiate folder
-        lfo.copyimagefile(inputimg,ext)
-        #Set image path
-        img_path = setImgFilePath(inputimg,ext)
-        # Open image file
-        img = Image.open(img_path)
-        # Get the size of the image
-        width,height = img.size
-        print(f'Image size {width} x {height}')
-
-    except EmptyString:
-        print ('Do not use empty strings in input')
-    finally:
-        print(f"Total time taken: {time.time() - start} seconds")
-
-
-def genDatabaseFile():
-    try:
-        inputimg = str(input("Enter image file (don't enter extension): "))
-        if inputimg == '':
-            raise EmptyString
-        ext = str(input('Enter the image file extension (.extension name eg. jpg for jpg image files): '))
-        if ext == '':
-            raise EmptyString
-        start = time.time()
-        #Copy image to appropiate folder
-        lfo.copyimagefile(inputimg,ext)
-        #Set Image folder path
-        img_folder_path = setImgFolderPath(inputimg)
-        #Set image path
-        img_file_path = setImgFilePath(inputimg,ext)
-        #Create database file
-        imgdb.createTables(img_folder_path,img_file_path,inputimg)
-    except EmptyString:
-        print ('Do not use empty strings in input')
-    except BaseException as base_err:
-        print(base_err)
-    finally:
-        print(f"Total time taken: {time.time() - start} seconds")
-
 
 def createSpImgExtFile():
     #Image extensions path
     sp_img_ext_name = "Supported Image Extensions"
-    sp_img_ext_loc = os.path.join(f'{sp_img_ext_name}.txt')
+    sp_img_ext_loc = path.join(f'{sp_img_ext_name}.txt')
     default = ['jpg','png','webp']
 
-    if not os.path.exists(sp_img_ext_loc):
+    if not path.exists(sp_img_ext_loc):
         try:
             with open(sp_img_ext_loc,'w') as extF:
                 for i in default:
@@ -202,12 +150,12 @@ def createSpImgExtFile():
 
   
 def editSpImgExtFile(input_command):
-    start = time.time()
+    start = time()
     createSpImgExtFile()
     default = ['jpg','png','webp']
     sp_img_ext_name = 'Supported Image Extensions.txt'
-    sp_img_ext_loc = os.path.join(sp_img_ext_name)
-    generated_commands =  re.split(' ',input_command)
+    sp_img_ext_loc = path.join(sp_img_ext_name)
+    generated_commands =  split(' ',input_command)
 
     store = []
     deletes = []
@@ -217,7 +165,7 @@ def editSpImgExtFile(input_command):
             with open(sp_img_ext_loc,'r') as extF:
                 num = extF.readlines()
                 for i in num:
-                    val = re.sub('\n','',i)
+                    val = sub('\n','',i)
                     store.append(val)
 
             if generated_commands[0] == 'add':
@@ -264,44 +212,59 @@ def editSpImgExtFile(input_command):
 
         except BaseException as err:
             print(err)
-    print(f"Total time taken: {time.time() - start} seconds")
+    print(f"Total time taken: {time() - start} seconds")
 
 def getSpImgExt():
     sp_img_ext_name = 'Supported Image Extensions.txt'
-    sp_img_ext_loc = os.path.join(sp_img_ext_name)
+    sp_img_ext_loc = path.join(sp_img_ext_name)
     store = []
     try:
         with open(sp_img_ext_loc,'r') as extF:
             num = extF.readlines()
             for i in num:
-                val = re.sub('\n','',i)
+                val = sub('\n','',i)
                 store.append(val)
             return store
     except BaseException as err:
         print(err)
+    
+def getImageSize():
+    try:
+        inputimg = str(input("Enter image file (don't enter extension): "))
+        if inputimg == '':
+            raise EmptyString
+        ext = str(input('Enter the image file extension (.extension name eg. jpg for jpg image files): '))
+        if ext == '':
+            raise EmptyString
+        start = time()
+        #Copy image to appropiate folder
+        copyimagefile(inputimg,ext)
+        #Set image path
+        img_path = setImgFilePath(inputimg,ext)
+        # Open image file
+        img = Image.open(img_path)
+        #Verify that image is not broken
+        if not img.verify() == None:
+            raise BrokenImageFile
+        #Reopen image file
+        img = Image.open(img_path)
+        # Get the size of the image
+        width,height = img.size
+        print(f'Image size {width} x {height}')
 
-def verify(initial_verify_list,verifyier_list):
-    sucList = []
-    #Convert to set to remove repeating values
-    verify_set = set(initial_verify_list)
-    #convert back to list for further computing
-    verify_list = [value for value in verify_set]
+    except EmptyString:
+        print ('Do not use empty strings in input')
+    except BrokenImageFile:
+        #Reopen image file
+        img = Image.open(img_path)
+        print(img.verify())
+        deletechildfolder(inputimg) 
+    except BaseException as base_err:
+        print(base_err)                       
+    finally:
+        print(f"Total time taken: {time() - start} seconds")
 
-    if len(verify_list)<=len(verifyier_list):
-        for i in range(len(verify_list)):
-            if (verify_list[i] in verifyier_list):
-                sucList.append(True)
-            else:
-                sucList.append(False)
-
-        if(all(sucList)):
-            return True
-        else:
-            return False
-    else:
-        return False
-
-def genGrayScaleFiles():
+def convertImg():
     try:
         inputimg = str(input("Enter image file (don't enter extension): "))
         if inputimg == '':
@@ -313,34 +276,44 @@ def genGrayScaleFiles():
         gray_scale_files = str(input("Input choice of extensions for output files (eg. for jpg and png input 'jpg & png'): "))
         if gray_scale_files == '':
             raise EmptyString
-        start = time.time()
+        start = time()
         #Copy image to appropiate folder
-        lfo.copyimagefile(inputimg,ext)
-        #Set Image folder path
-        img_folder_path = setImgFolderPath(inputimg)
+        copyimagefile(inputimg,ext)
         #Set image path
-        img_file_path = setImgFilePath(inputimg,ext)  
-        #Create database file
-        imgdb.createTables(img_folder_path,img_file_path,inputimg)
-        verify_list = re.split(r'[\s][\&][\s)]',gray_scale_files)
-        #Verify that grayscale file format is supported
+        img_file_path = setImgFilePath(inputimg,ext)
+        #Open image file
+        img = Image.open(img_file_path)
+        #Verify that image is not broken 
+        if not img.verify() == None:
+            raise BrokenImageFile
+        #Verify that image file format is supported
         verified = getSpImgExt()
+        #Get inputted grayscale image file extensions
+        verify_list = split(r'[\s][\&][\s)]',gray_scale_files)
         #Create grayscale image files
         for i in range(len(verify_list)):
             if (verify_list[i] in verified):
-                imggray.createGrayScaleFile(img_folder_path,img_file_path,verify_list[i],inputimg)
+                if not verify_list[i] == ext:
+                    new_img = Image.open(img_file_path)
+                    new_img.save(path.join("Resources","Images",inputimg),verify_list[i])            
             else:
-                raise ExtensionNotSupported
+                raise ImageExtensionNotSupported
     except EmptyString:
         print ('Do not use empty strings in input')
-    except ExtensionNotSupported:
-        print(f'{verify_list[i]} grayscale image extension not supported, supported values are {getSpImgExt()}, check extensions and try again')
+    except ImageExtensionNotSupported:
+        print(f'{verify_list[i]} image extension not supported, supported values are {getSpImgExt()}, check extensions and try again')
+    except BrokenImageFile:
+        #Reopen image file
+        img = Image.open(img_file_path)
+        print(img.verify())
+        deletechildfolder(inputimg) 
+        img = Image.open()
     except BaseException as base_err:
         print(base_err)
     finally:
-        print(f"Total time taken: {time.time() - start} seconds")
+        print(f"Total time taken: {time() - start} seconds")
 
-def genGaussianBlurFile():
+def genEdges():
     try:
         inputimg = str(input('Input file: '))
         if inputimg == '':
@@ -348,38 +321,43 @@ def genGaussianBlurFile():
         ext = str(input('Input file extension: '))
         if ext == '':
             raise EmptyString
-        start = time.time()
+        start = time()
         #Copy image to appropiate folder
-        lfo.copyimagefile(inputimg,ext)
+        copyimagefile(inputimg,ext)
         #Set Image folder path
         img_folder_path = setImgFolderPath(inputimg)
         #Set image path
         img_file_path = setImgFilePath(inputimg,ext)
-        print(img_folder_path)
-        print(img_file_path)  
-        #Create database
-        imgdb.createTables(img_folder_path,img_file_path,inputimg)
-        #Verify that grayscale file format is supported
+        #Open image file
+        img = Image.open(img_file_path)
+        #Verify that image is not broken 
+        if not img.verify() == None:
+            raise BrokenImageFile
+        #Verify that image file format is supported
         verified = getSpImgExt()
-        #Create grayscale image files
+        #Create image with edges enhanced
         if (ext in verified):
-            imggray.createGrayScaleFile(img_folder_path,img_file_path,ext,inputimg)
+            detectEdges(ext,img_folder_path,img_file_path,inputimg)
         else:
-            raise ExtensionNotSupported
-        imggblur.createBlur(ext,img_folder_path,inputimg)
+            raise ImageExtensionNotSupported
     except EmptyString:
         print ('Do not use empty strings in input')
-    except ExtensionNotSupported:
-        print(f'{ext} grayscale image extension not supported, supported values are {getSpImgExt()}, check extensions and try again')
+    except ImageExtensionNotSupported:
+        print(f"{ext} image extension not supported, supported values are {getSpImgExt()}, check extensions and try again")
+    except BrokenImageFile:
+        #Reopen image file
+        img = Image.open(img_file_path)
+        print(img.verify())
+        deletechildfolder(inputimg) 
+        img = Image.open()
     except BaseException as base_err:
         print(base_err)
     finally:
-        print(f"Total time taken: {time.time() - start} seconds")
+        print(f"Total time taken: {time() - start} seconds")
 
-
-#combine all main helper functions to form a coherent output
+#Combine all main helper functions to form a coherent output
 def organize():
-    start = time.time()
+    start = time()
     try:
         common = handleinput(myinput())
         if common == "h":
@@ -387,17 +365,37 @@ def organize():
             help()
         elif common == 's':
             getImageSize()
-        elif common == 'd':
-            genDatabaseFile()
-        elif common == 'g':
-            genGrayScaleFiles()
-        elif common == 'b':
-            genGaussianBlurFile()
-        elif common == 'm':
+        elif common == 'c':
+            convertImg()
+        elif common == "m":
             editSpImgExtFile(str(input('Input Command : ')))
-        print(f"Total time spent in cycle: {time.time() - start} seconds")
+        elif common == "e":
+            genEdges();
+        print(f"Total time spent in cycle: {time() - start} seconds")
         organize()
     except ExitProgram:
         print("Program exited")
-        print(f"Total time spent in cycle: {time.time() - start} seconds")
+        print(f"Total time spent in cycle: {time() - start} seconds")
 organize()
+
+
+# def verifySpImgFormats(initial_verify_list,verifyier_list):
+#     sucList = []
+#     #Convert to set to remove repeating values
+#     verify_set = set(initial_verify_list)
+#     #convert back to list for further computing
+#     verify_list = [value for value in verify_set]
+
+#     if len(verify_list)<=len(verifyier_list):
+#         for i in range(len(verify_list)):
+#             if (verify_list[i] in verifyier_list):
+#                 sucList.append(True)
+#             else:
+#                 sucList.append(False)
+
+#         if(all(sucList)):
+#             return True
+#         else:
+#             return False
+#     else:
+#         return False
