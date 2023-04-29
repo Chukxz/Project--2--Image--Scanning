@@ -1,6 +1,6 @@
 if __name__ != "__main__":
     from pathconfig import configure
-    from cv2 import imread,Canny,cvtColor,imwrite,destroyAllWindows,waitKey,COLOR_BGR2RGB,COLOR_RGB2GRAY,GaussianBlur,Sobel,CV_64F
+    from cv2 import imread,Canny,cvtColor,imwrite,destroyAllWindows,waitKey,COLOR_RGB2GRAY,GaussianBlur,Sobel,CV_64F
     from matplotlib.pyplot import imshow, show
     from os import path
 
