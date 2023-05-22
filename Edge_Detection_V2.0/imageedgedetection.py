@@ -32,7 +32,7 @@ if __name__ != "__main__":
                 sobelxy = Sobel(post_g_blur,CV_64F,1,1,5)
                 #Perform the canny edge detector to detect
                 edges = Canny(post_g_blur,threshold1=50,threshold2=150)
-
+                
                 if(d_USE_GUI==True):
                     imshow(gray,cmap="gray")
                     show()
